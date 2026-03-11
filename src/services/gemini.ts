@@ -35,7 +35,37 @@ export const generateReadingArticle = async (topic: string, level: 'B2' | 'C1') 
   Inclus un titre accrocheur.
   Après l'article, propose 5 mots de vocabulaire difficiles avec leurs définitions en français.
   Propose également 3 questions de compréhension.
+  IMPORTANT: Formatte les questions de la manière suivante :
+  ### Questions de compréhension
+  1. [Question 1]
+  2. [Question 2]
+  3. [Question 3]
+  
   Formatte le tout en Markdown.`;
 
   return generateFrenchContent(`Sujet : ${topic}`, systemInstruction);
+};
+
+export const evaluateReadingAnswers = async (article: string, questions: string, answers: string) => {
+  const systemInstruction = `Tu es un examinateur expert du DELF B2 / DALF C1.
+  Tu vas recevoir un article, des questions de compréhension sur cet article, et les réponses d'un étudiant.
+  Ton rôle est de :
+  1. Évaluer la pertinence et la précision de chaque réponse par rapport à l'article.
+  2. Corriger les erreurs de grammaire, de syntaxe et de vocabulaire dans les réponses de l'étudiant.
+  3. Donner une note globale sur 10 pour la compréhension.
+  4. Proposer des versions améliorées (niveau C1) des réponses de l'étudiant.
+  Réponds en français de manière constructive en utilisant le format Markdown.`;
+
+  const prompt = `
+  ARTICLE:
+  ${article}
+
+  QUESTIONS:
+  ${questions}
+
+  RÉPONSES DE L'ÉTUDIANT:
+  ${answers}
+  `;
+
+  return generateFrenchContent(prompt, systemInstruction);
 };

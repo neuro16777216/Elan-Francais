@@ -26,6 +26,7 @@ export const Chat: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [permissionStatus, setPermissionStatus] = useState<PermissionState | 'unknown'>('unknown');
   const [retryCount, setRetryCount] = useState(0);
+  const [hasStartedConversation, setHasStartedConversation] = useState(false);
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -94,6 +95,11 @@ export const Chat: React.FC = () => {
             setIsLoading(false);
             setIsListening(true);
             setIsLiveMode(true);
+            
+            if (!hasStartedConversation) {
+              updateProgress({ conversationsCount: getProgress().conversationsCount + 1 });
+              setHasStartedConversation(true);
+            }
             
             audioProcessorRef.current?.start((base64Data) => {
               sessionPromise.then((session) => {
@@ -496,6 +502,11 @@ export const Chat: React.FC = () => {
       }
       
       updateProgress({ messagesSent: getProgress().messagesSent + 1 });
+      
+      if (!hasStartedConversation) {
+        updateProgress({ conversationsCount: getProgress().conversationsCount + 1 });
+        setHasStartedConversation(true);
+      }
       
       // Automatically play TTS if it was voice initiated
       if (isVoiceInitiated) {

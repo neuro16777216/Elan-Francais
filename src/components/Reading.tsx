@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { BookOpen, Search, Loader2, RefreshCw } from 'lucide-react';
+import { BookOpen, Search, Loader2, RefreshCw, Send, CheckCircle2 } from 'lucide-react';
 import Markdown from 'react-markdown';
-import { generateReadingArticle } from '../services/gemini';
+import { generateReadingArticle, evaluateReadingAnswers } from '../services/gemini';
 import { motion, AnimatePresence } from 'motion/react';
 import { getProgress, updateProgress } from '../utils/progress';
 
@@ -18,10 +18,15 @@ export const Reading: React.FC = () => {
   const [level, setLevel] = useState<'B2' | 'C1'>('B2');
   const [article, setArticle] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState(TOPICS[0]);
+  const [answers, setAnswers] = useState('');
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   const handleGenerate = async () => {
     setIsLoading(true);
+    setFeedback(null);
+    setAnswers('');
     try {
       const content = await generateReadingArticle(selectedTopic, level);
       setArticle(content || "Erreur lors de la génération.");
@@ -33,6 +38,25 @@ export const Reading: React.FC = () => {
       setArticle("Une erreur est survenue.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleEvaluate = async () => {
+    if (!article || !answers.trim() || isEvaluating) return;
+    
+    setIsEvaluating(true);
+    try {
+      // Extract questions from article if possible
+      const questionsMatch = article.match(/### Questions de compréhension[\s\S]*/);
+      const questions = questionsMatch ? questionsMatch[0] : "Questions non trouvées";
+      
+      const result = await evaluateReadingAnswers(article, questions, answers);
+      setFeedback(result || "Erreur lors de l'évaluation.");
+    } catch (error) {
+      console.error(error);
+      setFeedback("Une erreur est survenue lors de l'évaluation.");
+    } finally {
+      setIsEvaluating(false);
     }
   };
 
@@ -87,14 +111,51 @@ export const Reading: React.FC = () => {
       <AnimatePresence mode="wait">
         {article && (
           <motion.div
+            key={article}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="bg-white p-8 rounded-2xl shadow-sm border border-black/5"
+            className="space-y-6"
           >
-            <div className="markdown-body">
-              <Markdown>{article}</Markdown>
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-black/5">
+              <div className="markdown-body">
+                <Markdown>{article}</Markdown>
+              </div>
             </div>
+
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-black/5">
+              <h4 className="font-serif text-lg font-bold mb-4 text-[#1a1a1a]">Vos Réponses</h4>
+              <p className="text-sm text-gray-500 mb-4">
+                Répondez aux questions ci-dessus en français pour tester votre compréhension.
+              </p>
+              <textarea
+                value={answers}
+                onChange={(e) => setAnswers(e.target.value)}
+                placeholder="Écrivez vos réponses ici..."
+                className="w-full h-40 p-4 rounded-xl border border-black/10 focus:outline-none focus:ring-2 focus:ring-[#5A5A40]/20 mb-4 font-sans text-sm"
+              />
+              <button
+                onClick={handleEvaluate}
+                disabled={isEvaluating || !answers.trim()}
+                className="w-full py-3 bg-[#5A5A40] text-white rounded-xl font-medium hover:bg-[#4a4a35] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isEvaluating ? <Loader2 className="animate-spin" size={20} /> : <CheckCircle2 size={20} />}
+                Évaluer mes réponses
+              </button>
+            </div>
+
+            {feedback && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-amber-50 p-8 rounded-2xl shadow-sm border border-amber-200"
+              >
+                <h4 className="font-serif text-lg font-bold mb-4 text-[#1a1a1a]">Feedback de l'Expert</h4>
+                <div className="markdown-body text-sm">
+                  <Markdown>{feedback}</Markdown>
+                </div>
+              </motion.div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

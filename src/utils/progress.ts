@@ -1,5 +1,6 @@
 interface ProgressData {
   messagesSent: number;
+  conversationsCount: number;
   pronunciationPractices: number;
   articlesRead: number;
   essaysWritten: number;
@@ -11,6 +12,7 @@ interface ProgressData {
 
 const DEFAULT_PROGRESS: ProgressData = {
   messagesSent: 0,
+  conversationsCount: 0,
   pronunciationPractices: 0,
   articlesRead: 0,
   essaysWritten: 0,

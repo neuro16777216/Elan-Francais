@@ -14,6 +14,7 @@ import { motion } from 'motion/react';
 
 interface ProgressData {
   messagesSent: number;
+  conversationsCount: number;
   pronunciationPractices: number;
   articlesRead: number;
   essaysWritten: number;
@@ -26,6 +27,7 @@ interface ProgressData {
 export const Progress: React.FC = () => {
   const [data, setData] = useState<ProgressData>({
     messagesSent: 0,
+    conversationsCount: 0,
     pronunciationPractices: 0,
     articlesRead: 0,
     essaysWritten: 0,
@@ -43,6 +45,7 @@ export const Progress: React.FC = () => {
   }, []);
 
   const stats = [
+    { label: 'Conversations', value: data.conversationsCount, icon: TrendingUp, color: 'text-indigo-500', bg: 'bg-indigo-50' },
     { label: 'Messages', value: data.messagesSent, icon: MessageSquare, color: 'text-blue-500', bg: 'bg-blue-50' },
     { label: 'Prononciation', value: data.pronunciationPractices, icon: Award, color: 'text-amber-500', bg: 'bg-amber-50' },
     { label: 'Lectures', value: data.articlesRead, icon: BookOpen, color: 'text-emerald-500', bg: 'bg-emerald-50' },
@@ -120,7 +123,8 @@ export const Progress: React.FC = () => {
         
         <div className="space-y-4">
           {[
-            { label: 'Converser 10 fois', current: data.messagesSent, target: 10 },
+            { label: 'Converser 10 fois', current: data.conversationsCount, target: 10 },
+            { label: 'Envoyer 100 messages', current: data.messagesSent, target: 100 },
             { label: 'Apprendre 50 mots', current: data.wordsLearned, target: 50 },
             { label: 'Lire 5 articles', current: data.articlesRead, target: 5 },
           ].map((goal) => (
