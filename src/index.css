@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", serif;
+  --font-sans: "Montserrat", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-[#f5f2ed] text-[#1a1a1a] font-sans;
+  }
+}
+
+.markdown-body h1 { @apply text-3xl font-serif font-bold mb-4; }
+.markdown-body h2 { @apply text-2xl font-serif font-semibold mb-3; }
+.markdown-body p { @apply mb-4 leading-relaxed; }
+.markdown-body ul { @apply list-disc pl-5 mb-4; }
+.markdown-body ol { @apply list-decimal pl-5 mb-4; }
+.markdown-body blockquote { @apply border-l-4 border-[#5A5A40] pl-4 italic my-4; }
